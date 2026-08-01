@@ -4,6 +4,7 @@ import { HiUser, HiMail, HiPhone, HiOfficeBuilding, HiLocationMarker } from 'rea
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import type { BookingFormData } from '../booking-types'
+import { countries } from '../countries'
 
 interface Props {
   register: UseFormRegister<BookingFormData>
@@ -72,16 +73,7 @@ export function SenderStep({ register, errors }: Props) {
         <Select
           label="Country *"
           placeholder="Select country"
-          options={[
-            { value: 'US', label: 'United States' },
-            { value: 'NG', label: 'Nigeria' },
-            { value: 'UK', label: 'United Kingdom' },
-            { value: 'CA', label: 'Canada' },
-            { value: 'DE', label: 'Germany' },
-            { value: 'FR', label: 'France' },
-            { value: 'AE', label: 'UAE' },
-            { value: 'CN', label: 'China' },
-          ]}
+          options={countries}
           error={errors.senderCountry?.message}
           {...register('senderCountry', { required: 'Country is required' })}
         />
