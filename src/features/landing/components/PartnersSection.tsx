@@ -35,7 +35,7 @@ export function PartnersSection() {
               objectFit="contain"
               rounded="md"
               priority
-              className="opacity-60 grayscale transition-all duration-300 group-hover:opacity-100 group-hover:grayscale-0"
+              className="transition-all duration-300 group-hover:scale-105"
               wrapperClassName="h-10 w-full"
             />
           </motion.div>
