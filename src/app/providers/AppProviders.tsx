@@ -3,6 +3,7 @@ import { RouterProvider } from 'react-router-dom'
 import { MotionConfig } from 'framer-motion'
 import { ThemeProvider } from './ThemeProvider'
 import { QueryProvider } from './QueryProvider'
+import { AuthProvider } from '@/features/admin/AuthProvider'
 import { ToastProvider } from '@/components/ui/Toast'
 import { router } from '@/app/routers'
 import { LoadingScreen } from '@/components/layout/LoadingScreen'
@@ -16,12 +17,14 @@ export function AppProviders() {
     <MotionConfig reducedMotion={prefersReducedMotion ? 'always' : 'never'}>
       <ThemeProvider>
         <QueryProvider>
-          <ToastProvider>
-            <Suspense fallback={<LoadingScreen />}>
-              <RouterProvider router={router} />
-            </Suspense>
-            <WhatsAppButton />
-          </ToastProvider>
+          <AuthProvider>
+            <ToastProvider>
+              <Suspense fallback={<LoadingScreen />}>
+                <RouterProvider router={router} />
+              </Suspense>
+              <WhatsAppButton />
+            </ToastProvider>
+          </AuthProvider>
         </QueryProvider>
       </ThemeProvider>
     </MotionConfig>

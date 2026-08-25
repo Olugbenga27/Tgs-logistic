@@ -1,4 +1,6 @@
+import { useMemo } from 'react'
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import {
   HiTrendingUp,
   HiTrendingDown,
@@ -20,15 +22,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils'
-
-const statCards = [
-  { label: 'Revenue', value: '$284,520', change: '+12.5%', up: true, icon: HiCurrencyDollar, gradient: 'from-emerald-500 to-emerald-600' },
-  { label: 'Customers', value: '24,681', change: '+8.2%', up: true, icon: HiUsers, gradient: 'from-tsg-500 to-tsg-600' },
-  { label: 'Shipments', value: '1,842', change: '+5.3%', up: true, icon: HiTruck, gradient: 'from-purple-500 to-purple-600' },
-  { label: "Today's Orders", value: '312', change: '+18.7%', up: true, icon: HiShoppingCart, gradient: 'from-amber-500 to-amber-600' },
-  { label: 'Pending Deliveries', value: '67', change: '-3.2%', up: false, icon: HiClock, gradient: 'from-red-500 to-red-600' },
-  { label: 'Support Tickets', value: '23', change: '+2.1%', up: true, icon: HiSupport, gradient: 'from-sky-500 to-sky-600' },
-]
+import { useDashboardStats, useAdminShipments } from '../api'
+import { formatMoney } from '../components/format'
 
 const revenueData = [
   { month: 'Jan', revenue: 18500, orders: 142 },
@@ -43,14 +38,6 @@ const revenueData = [
   { month: 'Oct', revenue: 32100, orders: 235 },
   { month: 'Nov', revenue: 36800, orders: 267 },
   { month: 'Dec', revenue: 42500, orders: 312 },
-]
-
-const recentShipments = [
-  { id: 'SH-001', route: 'New York → Los Angeles', status: 'in_transit', cost: 1240.50, date: '2 hours ago' },
-  { id: 'SH-004', route: 'San Francisco → Boston', status: 'in_transit', cost: 1520.00, date: '5 hours ago' },
-  { id: 'SH-007', route: 'Lagos → New York', status: 'in_transit', cost: 2450.00, date: '1 day ago' },
-  { id: 'SH-003', route: 'Houston → Seattle', status: 'delivered', cost: 890.25, date: '2 days ago' },
-  { id: 'SH-010', route: 'Miami → Orlando', status: 'delivered', cost: 195.00, date: '2 days ago' },
 ]
 
 const statusBadge: Record<string, 'success' | 'info' | 'warning'> = {
@@ -69,16 +56,43 @@ const activities = [
 ]
 
 const quickActions = [
-  { label: 'New Shipment', icon: HiCube, desc: 'Create a new booking', path: '/book-shipment' },
-  { label: 'Track Cargo', icon: HiLocationMarker, desc: 'Real-time tracking', path: '/track' },
-  { label: 'View Reports', icon: HiChartBar, desc: 'Analytics & insights', path: '/reports' },
-  { label: 'Manage Fleet', icon: HiClipboardList, desc: 'Vehicle overview', path: '/fleet' },
-  { label: 'Wallet', icon: HiCurrencyDollar, desc: 'Balance & transactions', path: '/wallet' },
-  { label: 'Settings', icon: HiShieldCheck, desc: 'System preferences', path: '/settings' },
+  { label: 'New Shipment', icon: HiCube, desc: 'Create a new booking', path: '/admin/bookings' },
+  { label: 'Track Cargo', icon: HiLocationMarker, desc: 'Real-time tracking', path: '/admin/shipments' },
+  { label: 'View Reports', icon: HiChartBar, desc: 'Analytics & insights', path: '/admin/reports' },
+  { label: 'Manage Fleet', icon: HiClipboardList, desc: 'Vehicle overview', path: '/admin/dashboard' },
+  { label: 'Wallet', icon: HiCurrencyDollar, desc: 'Balance & transactions', path: '/admin/payments' },
+  { label: 'Settings', icon: HiShieldCheck, desc: 'System preferences', path: '/admin/settings' },
 ]
 
 export function AdminDashboardPage() {
   const maxRevenue = Math.max(...revenueData.map(d => d.revenue))
+  const { data: stats } = useDashboardStats()
+  const { data: allShipments = [] } = useAdminShipments()
+
+  const statCards = useMemo(() => {
+    const revenue = stats?.totalRevenue ?? 0
+    const customers = stats?.totalCustomers ?? 0
+    const totalShipments = stats?.totalShipments ?? 0
+    const pending = stats?.pendingBookings ?? 0
+    const inTransit = stats?.inTransit ?? 0
+    const delivered = stats?.delivered ?? 0
+    return [
+      { label: 'Revenue', value: formatMoney(revenue), change: '+12.5%', up: true, icon: HiCurrencyDollar, gradient: 'from-emerald-500 to-emerald-600' },
+      { label: 'Customers', value: customers.toLocaleString(), change: '+8.2%', up: true, icon: HiUsers, gradient: 'from-tsg-500 to-tsg-600' },
+      { label: 'Shipments', value: totalShipments.toLocaleString(), change: '+5.3%', up: true, icon: HiTruck, gradient: 'from-purple-500 to-purple-600' },
+      { label: 'In Transit', value: inTransit.toLocaleString(), change: '', up: true, icon: HiShoppingCart, gradient: 'from-amber-500 to-amber-600' },
+      { label: 'Pending', value: pending.toLocaleString(), change: '', up: false, icon: HiClock, gradient: 'from-red-500 to-red-600' },
+      { label: 'Delivered', value: delivered.toLocaleString(), change: '', up: true, icon: HiSupport, gradient: 'from-sky-500 to-sky-600' },
+    ]
+  }, [stats])
+
+  const recentShipments = useMemo(() => {
+    return allShipments.slice(0, 5).map((s) => ({
+      id: s.id.slice(0, 8).toUpperCase(),
+      route: `${s.origin} → ${s.destination}`,
+      status: s.status,
+    }))
+  }, [allShipments])
 
   return (
     <div className="space-y-6">
@@ -94,9 +108,11 @@ export function AdminDashboardPage() {
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
           </p>
         </div>
-        <Button variant="primary" size="sm">
-          <HiCube className="h-4 w-4" />
-          New Shipment
+        <Button asChild variant="primary" size="sm">
+          <Link to="/admin/bookings">
+            <HiCube className="h-4 w-4" />
+            New Shipment
+          </Link>
         </Button>
       </motion.div>
 
@@ -111,9 +127,11 @@ export function AdminDashboardPage() {
         <p className="text-sm text-[var(--text-secondary)] flex-1">
           <span className="font-semibold text-[var(--text-primary)]">3 shipments</span> require attention
         </p>
-        <Button variant="ghost" size="xs">
-          View All
-          <HiArrowRight className="h-3 w-3" />
+        <Button asChild variant="ghost" size="xs">
+          <Link to="/admin/shipments">
+            View All
+            <HiArrowRight className="h-3 w-3" />
+          </Link>
         </Button>
       </motion.div>
 
@@ -138,13 +156,15 @@ export function AdminDashboardPage() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">{stat.label}</p>
                       <p className="mt-1.5 text-2xl font-bold text-[var(--text-primary)]">{stat.value}</p>
-                      <div className={cn(
-                        'flex items-center gap-1 mt-1.5 text-xs font-medium',
-                        stat.up ? 'text-emerald-500' : 'text-red-500',
-                      )}>
-                        {stat.up ? <HiTrendingUp className="h-3.5 w-3.5" /> : <HiTrendingDown className="h-3.5 w-3.5" />}
-                        {stat.change} vs last month
-                      </div>
+                      {stat.change && (
+                        <div className={cn(
+                          'flex items-center gap-1 mt-1.5 text-xs font-medium',
+                          stat.up ? 'text-emerald-500' : 'text-red-500',
+                        )}>
+                          {stat.up ? <HiTrendingUp className="h-3.5 w-3.5" /> : <HiTrendingDown className="h-3.5 w-3.5" />}
+                          {stat.change} vs last month
+                        </div>
+                      )}
                     </div>
                     <div className={cn(
                       'flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-lg shrink-0 transition-transform group-hover:scale-110',
@@ -252,13 +272,17 @@ export function AdminDashboardPage() {
                       <p className="text-xs text-[var(--text-muted)] truncate">{s.route}</p>
                     </div>
                     <div className="text-right">
-                      <Badge variant={statusBadge[s.status]} size="sm">
+                      <Badge variant={statusBadge[s.status] ?? 'info'} size="sm">
                         {s.status.replace('_', ' ')}
                       </Badge>
-                      <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{s.date}</p>
                     </div>
                   </motion.div>
                 ))}
+                {recentShipments.length === 0 && (
+                  <div className="px-4 py-8 text-center text-sm text-[var(--text-muted)]">
+                    No shipments yet
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -339,22 +363,25 @@ export function AdminDashboardPage() {
                 {quickActions.map((action, i) => {
                   const Icon = action.icon
                   return (
-                    <motion.a
+                    <motion.div
                       key={action.label}
-                      href={action.path}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.32 + i * 0.03 }}
-                      className="group flex flex-col items-center gap-2 rounded-xl border border-[var(--border-subtle)] p-4 text-center transition-all duration-200 hover:border-tsg-500/30 hover:shadow-elevated hover:-translate-y-0.5"
                     >
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-tsg-500 to-tsg-600 text-white shadow-md transition-transform group-hover:scale-110">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold text-[var(--text-primary)]">{action.label}</p>
-                        <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{action.desc}</p>
-                      </div>
-                    </motion.a>
+                      <Link
+                        to={action.path}
+                        className="group flex flex-col items-center gap-2 rounded-xl border border-[var(--border-subtle)] p-4 text-center transition-all duration-200 hover:border-tsg-500/30 hover:shadow-elevated hover:-translate-y-0.5"
+                      >
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-tsg-500 to-tsg-600 text-white shadow-md transition-transform group-hover:scale-110">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-[var(--text-primary)]">{action.label}</p>
+                          <p className="text-[10px] text-[var(--text-muted)] mt-0.5">{action.desc}</p>
+                        </div>
+                      </Link>
+                    </motion.div>
                   )
                 })}
               </div>

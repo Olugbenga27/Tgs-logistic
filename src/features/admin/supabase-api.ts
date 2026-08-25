@@ -1,33 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
-import { mockCustomers, mockCouriers } from '@/lib/mock-data'
-import type { Customer, Courier } from '@/types'
 import type {
   AdminCustomer,
   AdminShipment,
   AdminPayment,
-  AdminInvoice,
-  AdminQuote,
-  AdminStaff,
-  AdminRole,
-  AdminNotification,
-  AdminReport,
 } from './types'
-import {
-  mockAdminInvoices,
-  mockAdminQuotes,
-  mockAdminStaff,
-  mockAdminRoles,
-  mockAdminNotifications,
-  mockAdminReports,
-} from './mock-data'
-
-// ============================================================
-// Detect whether Supabase is configured
-// ============================================================
-const hasSupabase = Boolean(
-  import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY,
-)
 
 // ============================================================
 // ADMIN CUSTOMERS
@@ -36,9 +13,6 @@ export function useAdminCustomers() {
   return useQuery<AdminCustomer[], Error>({
     queryKey: ['admin', 'customers'],
     queryFn: async () => {
-      if (!hasSupabase) {
-        return (await import('./mock-data')).mockAdminCustomers
-      }
       const { data, error } = await supabase!
         .from('customers')
         .select('*')
@@ -70,9 +44,6 @@ export function useAdminShipments() {
   return useQuery<AdminShipment[], Error>({
     queryKey: ['admin', 'shipments'],
     queryFn: async () => {
-      if (!hasSupabase) {
-        return (await import('./mock-data')).mockAdminShipments
-      }
       const { data, error } = await supabase!
         .from('bookings')
         .select('*')
@@ -82,13 +53,9 @@ export function useAdminShipments() {
         id: row.booking_id,
         customer: row.customer_name ?? 'Unknown',
         customerId: row.customer_id ?? '',
-        origin: row.sender_city && row.sender_country
-          ? `${row.sender_city}, ${row.sender_country}`
-          : row.sender_city ?? '',
-        destination: row.receiver_city && row.receiver_country
-          ? `${row.receiver_city}, ${row.receiver_country}`
-          : row.receiver_city ?? '',
-        type: (row.shipping_method === 'express' ? 'air' : row.shipping_method) as 'air' | 'sea' | 'road',
+        origin: row.sender_city && row.sender_country ? `${row.sender_city}, ${row.sender_country}` : row.sender_city ?? '',
+        destination: row.receiver_city && row.receiver_country ? `${row.receiver_city}, ${row.receiver_country}` : row.receiver_city ?? '',
+        type: row.shipping_method === 'express' ? 'air' : (row.shipping_method as 'air' | 'sea' | 'road') ?? 'air',
         status: row.status as AdminShipment['status'],
         priority: 'standard' as const,
         weight: Number(row.weight_kg ?? 0),
@@ -109,9 +76,6 @@ export function useAdminPayments() {
   return useQuery<AdminPayment[], Error>({
     queryKey: ['admin', 'payments'],
     queryFn: async () => {
-      if (!hasSupabase) {
-        return (await import('./mock-data')).mockAdminPayments
-      }
       const { data, error } = await supabase!
         .from('payments')
         .select('*')
@@ -128,138 +92,6 @@ export function useAdminPayments() {
         method: row.method as AdminPayment['method'],
         status: row.status as AdminPayment['status'],
         date: row.created_at,
-      }))
-    },
-  })
-}
-
-// ============================================================
-// ADMIN INVOICES (mock only for now)
-// ============================================================
-export function useAdminInvoices() {
-  return useQuery<AdminInvoice[], Error>({
-    queryKey: ['admin', 'invoices'],
-    queryFn: async () => {
-      if (!hasSupabase) return mockAdminInvoices
-      // TODO: connect to Supabase invoices table
-      return mockAdminInvoices
-    },
-  })
-}
-
-// ============================================================
-// ADMIN QUOTES (mock only for now)
-// ============================================================
-export function useAdminQuotes() {
-  return useQuery<AdminQuote[], Error>({
-    queryKey: ['admin', 'quotes'],
-    queryFn: async () => {
-      if (!hasSupabase) return mockAdminQuotes
-      return mockAdminQuotes
-    },
-  })
-}
-
-// ============================================================
-// ADMIN STAFF (mock only for now)
-// ============================================================
-export function useAdminStaff() {
-  return useQuery<AdminStaff[], Error>({
-    queryKey: ['admin', 'staff'],
-    queryFn: async () => {
-      if (!hasSupabase) return mockAdminStaff
-      return mockAdminStaff
-    },
-  })
-}
-
-// ============================================================
-// ADMIN ROLES (mock only for now)
-// ============================================================
-export function useAdminRoles() {
-  return useQuery<AdminRole[], Error>({
-    queryKey: ['admin', 'roles'],
-    queryFn: async () => {
-      if (!hasSupabase) return mockAdminRoles
-      return mockAdminRoles
-    },
-  })
-}
-
-// ============================================================
-// ADMIN NOTIFICATIONS (mock only for now)
-// ============================================================
-export function useAdminNotifications() {
-  return useQuery<AdminNotification[], Error>({
-    queryKey: ['admin', 'notifications'],
-    queryFn: async () => {
-      if (!hasSupabase) return mockAdminNotifications
-      return mockAdminNotifications
-    },
-  })
-}
-
-// ============================================================
-// ADMIN REPORTS (mock only for now)
-// ============================================================
-export function useAdminReports() {
-  return useQuery<AdminReport[], Error>({
-    queryKey: ['admin', 'reports'],
-    queryFn: async () => {
-      if (!hasSupabase) return mockAdminReports
-      return mockAdminReports
-    },
-  })
-}
-
-// ============================================================
-// BOOKING: Customer & Courier lists (for booking page)
-// ============================================================
-export function useBookingCustomers() {
-  return useQuery<Customer[], Error>({
-    queryKey: ['admin', 'booking', 'customers'],
-    queryFn: async () => {
-      if (!hasSupabase) return mockCustomers
-      const { data, error } = await supabase!
-        .from('customers')
-        .select('*')
-        .order('full_name')
-      if (error) throw error
-      return (data ?? []).map((row) => ({
-        id: row.id,
-        name: row.full_name,
-        email: row.email,
-        phone: row.phone ?? '',
-        company: row.company ?? '',
-        address: row.address ?? '',
-        city: row.city ?? '',
-        createdAt: row.created_at,
-        totalShipments: row.total_shipments,
-      }))
-    },
-  })
-}
-
-export function useBookingCouriers() {
-  return useQuery<Courier[], Error>({
-    queryKey: ['admin', 'booking', 'couriers'],
-    queryFn: async () => {
-      if (!hasSupabase) return mockCouriers
-      const { data, error } = await supabase!
-        .from('couriers')
-        .select('*')
-        .order('name')
-      if (error) throw error
-      return (data ?? []).map((row) => ({
-        id: row.id,
-        name: row.name,
-        phone: row.phone ?? '',
-        email: row.email ?? '',
-        vehicle: row.vehicle ?? '',
-        plateNumber: row.plate_number ?? '',
-        status: row.status ?? 'offline',
-        rating: row.rating ?? 0,
-        totalDeliveries: row.total_deliveries ?? 0,
       }))
     },
   })
@@ -297,10 +129,6 @@ export function useCreateBooking() {
 
   return useMutation({
     mutationFn: async (input: CreateBookingInput) => {
-      if (!hasSupabase) {
-        await new Promise((r) => setTimeout(r, 800))
-        return { id: 'mock-booking', booking_id: 'TSG-MOCK', tracking_number: 'TSG-MOCK' }
-      }
       const { data, error } = await supabase!
         .from('bookings')
         .insert({
@@ -329,6 +157,7 @@ export function useCreateBooking() {
         })
         .select()
         .single()
+
       if (error) throw error
       return data
     },
@@ -343,10 +172,6 @@ export function useUpdateBookingStatus() {
 
   return useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      if (!hasSupabase) {
-        await new Promise((r) => setTimeout(r, 400))
-        return
-      }
       const { error } = await supabase!
         .from('bookings')
         .update({ status })
@@ -364,10 +189,6 @@ export function useDeleteBooking() {
 
   return useMutation({
     mutationFn: async (id: string) => {
-      if (!hasSupabase) {
-        await new Promise((r) => setTimeout(r, 400))
-        return
-      }
       const { error } = await supabase!
         .from('bookings')
         .delete()
@@ -381,13 +202,12 @@ export function useDeleteBooking() {
 }
 
 // ============================================================
-// TRACKING
+// TRACKING EVENTS
 // ============================================================
 export function useTrackingEvents(trackingNumber: string) {
   return useQuery({
     queryKey: ['tracking', trackingNumber],
     queryFn: async () => {
-      if (!hasSupabase) return []
       const { data, error } = await supabase!
         .from('tracking_events')
         .select('*')
@@ -414,10 +234,6 @@ export function useAddTrackingEvent() {
       event_date?: string
       event_time?: string
     }) => {
-      if (!hasSupabase) {
-        await new Promise((r) => setTimeout(r, 400))
-        return
-      }
       const { error } = await supabase!
         .from('tracking_events')
         .insert({
@@ -438,30 +254,69 @@ export function useAddTrackingEvent() {
 }
 
 // ============================================================
+// ADMIN CUSTOMERS MUTATIONS
+// ============================================================
+export function useCreateCustomer() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (input: {
+      full_name: string
+      email: string
+      phone?: string
+      company?: string
+      address?: string
+      city?: string
+      country?: string
+    }) => {
+      const { data, error } = await supabase!
+        .from('customers')
+        .insert(input)
+        .select()
+        .single()
+      if (error) throw error
+      return data
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'customers'] })
+    },
+  })
+}
+
+// ============================================================
+// MESSAGES
+// ============================================================
+export function useAdminMessages() {
+  return useQuery({
+    queryKey: ['admin', 'messages'],
+    queryFn: async () => {
+      const { data, error } = await supabase!
+        .from('messages')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data ?? []
+    },
+  })
+}
+
+// ============================================================
 // DASHBOARD STATS
 // ============================================================
 export function useDashboardStats() {
   return useQuery({
     queryKey: ['admin', 'dashboard', 'stats'],
     queryFn: async () => {
-      if (!hasSupabase) {
-        return {
-          totalShipments: 24,
-          pendingBookings: 5,
-          inTransit: 8,
-          delivered: 9,
-          totalCustomers: 22,
-          totalRevenue: 284520,
-        }
-      }
       const [shipmentsRes, customersRes, paymentsRes] = await Promise.all([
-        supabase!.from('bookings').select('id, status, price'),
+        supabase!.from('bookings').select('id, status, price, created_at'),
         supabase!.from('customers').select('id'),
         supabase!.from('payments').select('id, amount, status'),
       ])
+
       const shipments = shipmentsRes.data ?? []
       const customers = customersRes.data ?? []
       const payments = paymentsRes.data ?? []
+
       const totalRevenue = payments
         .filter((p) => p.status === 'paid')
         .reduce((sum, p) => sum + Number(p.amount), 0)

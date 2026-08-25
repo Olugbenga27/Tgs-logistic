@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { PublicLayout } from '@/components/layout/PublicLayout'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { ProtectedRoute } from '@/components/layout/ProtectedRoute'
@@ -26,6 +26,11 @@ import { WarehousesPage } from '@/features/warehouses/pages/WarehousesPage'
 import { FleetPage } from '@/features/fleet/pages/FleetPage'
 import { WalletPage } from '@/features/wallet/pages/WalletPage'
 import { SettingsPage } from '@/features/settings/pages/SettingsPage'
+
+// Admin imports
+import { AdminProtectedRoute } from '@/features/admin/AdminProtectedRoute'
+import { AdminLayout } from '@/features/admin/AdminLayout'
+import { AdminLoginPage } from '@/features/admin/pages/AdminLoginPage'
 import { AdminDashboardPage } from '@/features/admin/pages/AdminDashboardPage'
 import { AdminBookingPage } from '@/features/admin/pages/AdminBookingPage'
 import { AdminCustomersPage } from '@/features/admin/pages/AdminCustomersPage'
@@ -40,6 +45,7 @@ import { AdminRolesPage } from '@/features/admin/pages/AdminRolesPage'
 import { AdminSettingsPage } from '@/features/admin/pages/AdminSettingsPage'
 
 export const router = createBrowserRouter([
+  // ── Auth pages (public) ──
   {
     path: '/login',
     element: <LoginPage />,
@@ -64,6 +70,8 @@ export const router = createBrowserRouter([
     path: '/otp',
     element: <OtpVerificationPage />,
   },
+
+  // ── Public website ──
   {
     element: <PublicLayout />,
     errorElement: <ErrorPage />,
@@ -79,6 +87,8 @@ export const router = createBrowserRouter([
       { path: 'book-shipment', element: <BookShipmentPage /> },
     ],
   },
+
+  // ── User dashboard (protected) ──
   {
     element: <ProtectedRoute />,
     errorElement: <ErrorPage />,
@@ -94,22 +104,42 @@ export const router = createBrowserRouter([
           { path: 'fleet', element: <FleetPage /> },
           { path: 'wallet', element: <WalletPage /> },
           { path: 'settings', element: <SettingsPage /> },
-          { path: 'admin', element: <AdminDashboardPage /> },
-          { path: 'admin/booking', element: <AdminBookingPage /> },
-          { path: 'admin/customers', element: <AdminCustomersPage /> },
-          { path: 'admin/shipments', element: <AdminShipmentsPage /> },
-          { path: 'admin/payments', element: <AdminPaymentsPage /> },
-          { path: 'admin/invoices', element: <AdminInvoicesPage /> },
-          { path: 'admin/reports', element: <AdminReportsPage /> },
-          { path: 'admin/notifications', element: <AdminNotificationsPage /> },
-          { path: 'admin/quotes', element: <AdminQuotesPage /> },
-          { path: 'admin/staff', element: <AdminStaffPage /> },
-          { path: 'admin/roles', element: <AdminRolesPage /> },
-          { path: 'admin/settings', element: <AdminSettingsPage /> },
         ],
       },
     ],
   },
+
+  // ── Admin portal (Supabase auth required) ──
+  {
+    path: '/admin/login',
+    element: <AdminLoginPage />,
+  },
+  {
+    element: <AdminProtectedRoute />,
+    children: [
+      {
+        path: '/admin',
+        element: <AdminLayout />,
+        children: [
+          { index: true, element: <Navigate to="/admin/dashboard" replace /> },
+          { path: 'dashboard', element: <AdminDashboardPage /> },
+          { path: 'bookings', element: <AdminBookingPage /> },
+          { path: 'customers', element: <AdminCustomersPage /> },
+          { path: 'shipments', element: <AdminShipmentsPage /> },
+          { path: 'payments', element: <AdminPaymentsPage /> },
+          { path: 'invoices', element: <AdminInvoicesPage /> },
+          { path: 'reports', element: <AdminReportsPage /> },
+          { path: 'notifications', element: <AdminNotificationsPage /> },
+          { path: 'quotes', element: <AdminQuotesPage /> },
+          { path: 'staff', element: <AdminStaffPage /> },
+          { path: 'roles', element: <AdminRolesPage /> },
+          { path: 'settings', element: <AdminSettingsPage /> },
+        ],
+      },
+    ],
+  },
+
+  // ── Catch-all ──
   {
     path: '*',
     element: <NotFoundPage />,
