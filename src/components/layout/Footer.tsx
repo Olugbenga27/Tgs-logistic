@@ -64,7 +64,7 @@ export function Footer() {
                 <img
                   src={logo}
                   alt="T.S.G Grateful Logistics"
-                  className="h-[60px] w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                  className="h-[68px] w-auto object-contain drop-shadow-[0_4px_12px_rgba(23,58,122,0.12)] transition-transform duration-300 group-hover:scale-105"
                 />
               </Link>
 
@@ -143,7 +143,7 @@ export function Footer() {
                     </div>
                     <div className="flex items-center gap-2.5 text-xs text-[var(--text-secondary)]">
                       <HiMail className="h-4 w-4 shrink-0 text-[var(--text-muted)]" />
-                      <span>info@tsggrateful.com</span>
+                      <span>Gratefullogisticsotm@gmail.com</span>
                     </div>
                   </div>
                 </div>

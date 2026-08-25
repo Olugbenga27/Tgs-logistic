@@ -16,6 +16,7 @@ import { Text } from '@/components/ui/Text'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
+import { CountryCitySelect } from '@/components/ui/CountryCitySelect'
 import { Card, CardContent } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 
@@ -257,8 +258,10 @@ function SummaryRow({ icon, label, value }: { icon: React.ReactNode; label: stri
 }
 
 export function QuotePage() {
-  const [origin, setOrigin] = useState('')
-  const [destination, setDestination] = useState('')
+  const [originCountry, setOriginCountry] = useState('')
+  const [originCity, setOriginCity] = useState('')
+  const [destinationCountry, setDestinationCountry] = useState('')
+  const [destinationCity, setDestinationCity] = useState('')
   const [weight, setWeight] = useState('')
   const [length, setLength] = useState('')
   const [width, setWidth] = useState('')
@@ -275,15 +278,18 @@ export function QuotePage() {
     const l = parseFloat(length) || 0
     const wi = parseFloat(width) || 0
     const h = parseFloat(height) || 0
-    if (!origin.trim() || !destination.trim() || !w || w <= 0) return
+    const originLabel = [originCity, originCountry].filter(Boolean).join(', ')
+    const destinationLabel = [destinationCity, destinationCountry].filter(Boolean).join(', ')
+
+    if (!originLabel || !destinationLabel || !w || w <= 0) return
 
     setCalculating(true)
     setResult(null)
 
     setTimeout(() => {
       const price = calculatePrice({
-        origin,
-        destination,
+        origin: originLabel,
+        destination: destinationLabel,
         weight: w,
         length: l,
         width: wi,
@@ -296,14 +302,14 @@ export function QuotePage() {
       setCalculating(false)
       setHasCalculated(true)
     }, 800)
-  }, [origin, destination, weight, length, width, height, packageType, insurance, method])
+  }, [originCity, originCountry, destinationCity, destinationCountry, weight, length, width, height, packageType, insurance, method])
 
   const handleReset = () => {
     setResult(null)
     setHasCalculated(false)
   }
 
-  const isValid = origin.trim() && destination.trim() && parseFloat(weight) > 0
+  const isValid = !!originCountry && !!originCity && !!destinationCountry && !!destinationCity && parseFloat(weight) > 0
 
   return (
     <div className="min-h-screen">
@@ -351,19 +357,23 @@ export function QuotePage() {
                 <CardContent className="p-6 sm:p-8">
                   <div className="space-y-6">
                     {/* Row 1: Origin & Destination */}
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid gap-4 lg:grid-cols-2">
                       <FormField label="Origin" icon={<HiLocationMarker className="h-3.5 w-3.5" />}>
-                        <Input
-                          placeholder="e.g. Lagos, Nigeria"
-                          value={origin}
-                          onChange={(e) => setOrigin(e.target.value)}
+                        <CountryCitySelect
+                          label="Origin"
+                          countryValue={originCountry}
+                          cityValue={originCity}
+                          onCountryChange={setOriginCountry}
+                          onCityChange={setOriginCity}
                         />
                       </FormField>
                       <FormField label="Destination" icon={<HiGlobe className="h-3.5 w-3.5" />}>
-                        <Input
-                          placeholder="e.g. New York, USA"
-                          value={destination}
-                          onChange={(e) => setDestination(e.target.value)}
+                        <CountryCitySelect
+                          label="Destination"
+                          countryValue={destinationCountry}
+                          cityValue={destinationCity}
+                          onCountryChange={setDestinationCountry}
+                          onCityChange={setDestinationCity}
                         />
                       </FormField>
                     </div>
@@ -516,7 +526,7 @@ export function QuotePage() {
             {/* Results */}
             <div className="mt-8">
               <AnimatePresence mode="wait">
-                {result && <ResultCard key="result" breakdown={result} method={method} origin={origin} destination={destination} />}
+                {result && <ResultCard key="result" breakdown={result} method={method} origin={[originCity, originCountry].filter(Boolean).join(', ')} destination={[destinationCity, destinationCountry].filter(Boolean).join(', ')} />}
               </AnimatePresence>
             </div>
           </div>

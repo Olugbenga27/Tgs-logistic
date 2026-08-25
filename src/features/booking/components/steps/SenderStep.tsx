@@ -1,17 +1,23 @@
-import type { UseFormRegister, FieldErrors } from 'react-hook-form'
+import { useMemo } from 'react'
+import type { UseFormRegister, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form'
 import { motion } from 'framer-motion'
 import { HiUser, HiMail, HiPhone, HiOfficeBuilding, HiLocationMarker } from 'react-icons/hi'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import type { BookingFormData } from '../booking-types'
 import { countries } from '../countries'
+import { getCityOptions } from '../cities'
 
 interface Props {
   register: UseFormRegister<BookingFormData>
   errors: FieldErrors<BookingFormData>
+  watch: UseFormWatch<BookingFormData>
+  setValue: UseFormSetValue<BookingFormData>
 }
 
-export function SenderStep({ register, errors }: Props) {
+export function SenderStep({ register, errors, watch, setValue }: Props) {
+  const senderCountry = watch('senderCountry')
+  const cityOptions = useMemo(() => getCityOptions(senderCountry), [senderCountry])
   return (
     <motion.div
       initial={{ opacity: 0, x: 30 }}
@@ -64,17 +70,23 @@ export function SenderStep({ register, errors }: Props) {
             {...register('senderAddress', { required: 'Address is required' })}
           />
         </div>
-        <Input
+        <Select
+          id="senderCity"
           label="City *"
-          placeholder="New York"
+          placeholder="Select city"
+          options={cityOptions}
           error={errors.senderCity?.message}
-          {...register('senderCity', { required: 'City is required' })}
+          searchable
+          value={watch('senderCity')}
+          onValueChange={(value) => setValue('senderCity', value)}
+          name="senderCity"
         />
         <Select
           label="Country *"
           placeholder="Select country"
           options={countries}
           error={errors.senderCountry?.message}
+          searchable
           {...register('senderCountry', { required: 'Country is required' })}
         />
       </div>

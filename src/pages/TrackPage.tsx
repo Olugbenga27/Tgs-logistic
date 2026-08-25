@@ -259,8 +259,9 @@ function MapPlaceholder({ origin, destination }: { origin: string; destination: 
         />
         <motion.circle
           cx="100" cy="380" r="7" fill="#f26722"
-          animate={{ r: [7, 10, 7] }}
+          animate={{ opacity: [0.7, 1, 0.7], scale: [1, 1.35, 1] }}
           transition={{ duration: 2, repeat: Infinity }}
+          style={{ transformOrigin: 'center' }}
         />
         <circle cx="700" cy="80" r="7" fill="#16a34a" />
         <motion.circle

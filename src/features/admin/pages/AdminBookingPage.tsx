@@ -22,6 +22,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
+import { CountryCitySelect } from '@/components/ui/CountryCitySelect'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Modal } from '@/components/ui/Modal'
@@ -372,10 +373,13 @@ export function AdminBookingPage() {
                         Origin
                       </p>
                       <Input label="Address" placeholder="Street address" value={originAddress} onChange={(e) => setOriginAddress(e.target.value)} leftIcon={<HiLocationMarker className="h-4 w-4" />} />
-                      <div className="grid grid-cols-2 gap-3">
-                        <Input label="City" placeholder="City" value={originCity} onChange={(e) => setOriginCity(e.target.value)} />
-                        <Input label="Country" placeholder="Country" value={originCountry} onChange={(e) => setOriginCountry(e.target.value)} />
-                      </div>
+                      <CountryCitySelect
+                        label="Origin"
+                        countryValue={originCountry}
+                        cityValue={originCity}
+                        onCountryChange={setOriginCountry}
+                        onCityChange={setOriginCity}
+                      />
                     </div>
                     <div className="space-y-4">
                       <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
@@ -383,10 +387,13 @@ export function AdminBookingPage() {
                         Destination
                       </p>
                       <Input label="Address" placeholder="Street address" value={destAddress} onChange={(e) => setDestAddress(e.target.value)} leftIcon={<HiLocationMarker className="h-4 w-4" />} />
-                      <div className="grid grid-cols-2 gap-3">
-                        <Input label="City" placeholder="City" value={destCity} onChange={(e) => setDestCity(e.target.value)} />
-                        <Input label="Country" placeholder="Country" value={destCountry} onChange={(e) => setDestCountry(e.target.value)} />
-                      </div>
+                      <CountryCitySelect
+                        label="Destination"
+                        countryValue={destCountry}
+                        cityValue={destCity}
+                        onCountryChange={setDestCountry}
+                        onCityChange={setDestCity}
+                      />
                     </div>
                   </div>
 

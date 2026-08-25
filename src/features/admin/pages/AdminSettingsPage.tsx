@@ -35,7 +35,7 @@ export function AdminSettingsPage() {
   const { success } = useToast()
   const [general, setGeneral] = useState({
     name: 'T.S.G Logistics',
-    email: 'support@tsglogistics.com',
+    email: 'Gratefullogisticsotm@gmail.com',
     phone: '+233 30 245 8890',
     address: 'Independence Ave, Accra',
     timezone: 'Africa/Accra (GMT+0)',

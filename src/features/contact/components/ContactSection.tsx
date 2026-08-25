@@ -61,7 +61,7 @@ const contactMethods = [
   {
     icon: HiMail,
     title: 'Email Us',
-    rows: [{ label: 'General', value: 'info@tsggrateful.com' }],
+    rows: [{ label: 'General', value: 'Gratefullogisticsotm@gmail.com' }],
   },
 ]
 

@@ -149,7 +149,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <img
               src={logo}
               alt="T.S.G Grateful Logistics"
-              className="h-11 w-auto object-contain transition-transform duration-200 group-hover:scale-105"
+              className="h-12 w-auto object-contain drop-shadow-[0_4px_10px_rgba(23,58,122,0.1)] transition-all duration-200 group-hover:scale-105"
             />
           </Link>
           <button

@@ -21,6 +21,8 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const { pathname } = useLocation()
 
+  const closeMobileMenu = () => setMobileOpen(false)
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', onScroll, { passive: true })
@@ -30,6 +32,24 @@ export function Navbar() {
   useEffect(() => {
     setMobileOpen(false)
   }, [pathname])
+
+  useEffect(() => {
+    if (!mobileOpen) {
+      document.body.style.overflow = ''
+      return
+    }
+
+    document.body.style.overflow = 'hidden'
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        closeMobileMenu()
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [mobileOpen])
 
   return (
     <header
@@ -46,7 +66,7 @@ export function Navbar() {
           <img
             src={logo}
             alt="T.S.G Grateful Logistics"
-            className="h-11 w-auto object-contain transition-transform duration-300 group-hover:scale-105 sm:h-14"
+            className="h-12 w-auto object-contain drop-shadow-[0_4px_12px_rgba(23,58,122,0.12)] transition-all duration-300 group-hover:scale-105 sm:h-14 lg:h-[3.5rem]"
           />
         </Link>
 
@@ -96,9 +116,12 @@ export function Navbar() {
 
         {/* Mobile Hamburger */}
         <button
-          onClick={() => setMobileOpen(!mobileOpen)}
+          type="button"
+          onClick={() => setMobileOpen((open) => !open)}
           className="flex xl:hidden h-9 w-9 items-center justify-center rounded-lg text-[var(--text-secondary)] hover:bg-[var(--surface-alt)] transition-colors"
           aria-label="Toggle menu"
+          aria-expanded={mobileOpen}
+          aria-controls="mobile-navigation"
         >
           {mobileOpen ? <HiX className="h-5 w-5" /> : <HiMenu className="h-5 w-5" />}
         </button>
@@ -111,10 +134,37 @@ export function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 top-18 z-40 bg-[var(--surface)]/95 backdrop-blur-xl xl:hidden"
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[70] bg-[var(--surface)]/95 backdrop-blur-xl xl:hidden"
+            onClick={closeMobileMenu}
           >
-            <nav className="flex flex-col h-full overflow-y-auto px-4 pb-8 pt-4">
-              <div className="flex flex-col gap-1">
+            <motion.div
+              id="mobile-navigation"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', stiffness: 280, damping: 30 }}
+              className="ml-auto flex h-full w-full max-w-sm flex-col overflow-y-auto border-l border-[var(--border-subtle)] bg-[var(--surface)] px-4 pb-8 pt-5 shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mb-4 flex items-center justify-between rounded-2xl border border-[var(--border-subtle)] bg-[var(--surface-alt)]/70 px-3 py-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--text-muted)]">
+                    Navigate
+                  </p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">Quick access</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeMobileMenu}
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-secondary)] transition-colors hover:bg-[var(--surface)]"
+                  aria-label="Close menu"
+                >
+                  <HiX className="h-5 w-5" />
+                </button>
+              </div>
+
+              <nav className="flex flex-col gap-1">
                 {navLinks.map((link, i) => (
                   <motion.div
                     key={link.path}
@@ -124,6 +174,7 @@ export function Navbar() {
                   >
                     <Link
                       to={link.path}
+                      onClick={closeMobileMenu}
                       className={cn(
                         'block rounded-lg px-4 py-3 text-base font-medium transition-all',
                         pathname === link.path
@@ -135,7 +186,7 @@ export function Navbar() {
                     </Link>
                   </motion.div>
                 ))}
-              </div>
+              </nav>
 
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
@@ -146,19 +197,23 @@ export function Navbar() {
                 <div className="flex gap-3">
                   <Link
                     to="/login"
+                    onClick={closeMobileMenu}
                     className="flex-1 rounded-lg border border-[var(--border-default)] px-4 py-2.5 text-center text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--surface-alt)] transition-colors"
                   >
                     Login
                   </Link>
                   <Link
                     to="/register"
+                    onClick={closeMobileMenu}
                     className="flex-1 rounded-lg bg-tsg-500 px-4 py-2.5 text-center text-sm font-medium text-white hover:bg-tsg-400 transition-colors"
                   >
                     Register
                   </Link>
                 </div>
                 <Button variant="gold" size="lg" className="w-full" asChild>
-                  <Link to="/book-shipment">Book Shipment</Link>
+                  <Link to="/book-shipment" onClick={closeMobileMenu}>
+                    Book Shipment
+                  </Link>
                 </Button>
               </motion.div>
 
@@ -170,7 +225,7 @@ export function Navbar() {
               >
                 <p>&copy; 2026 T.S.G Grateful Logistics. All rights reserved.</p>
               </motion.div>
-            </nav>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

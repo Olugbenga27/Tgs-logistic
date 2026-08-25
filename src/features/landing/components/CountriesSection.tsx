@@ -105,7 +105,8 @@ export function CountriesSection() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: dot.delay }}
-              animate={{ r: [4, 6, 4] }}
+              animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.4, 1] }}
+              style={{ transformOrigin: 'center' }}
             />
           ))}
         </svg>

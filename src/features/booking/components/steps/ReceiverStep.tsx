@@ -1,17 +1,23 @@
-import type { UseFormRegister, FieldErrors } from 'react-hook-form'
+import { useMemo } from 'react'
+import type { UseFormRegister, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form'
 import { motion } from 'framer-motion'
 import { HiUser, HiMail, HiPhone, HiOfficeBuilding, HiLocationMarker } from 'react-icons/hi'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import type { BookingFormData } from '../booking-types'
 import { countries } from '../countries'
+import { getCityOptions } from '../cities'
 
 interface Props {
   register: UseFormRegister<BookingFormData>
   errors: FieldErrors<BookingFormData>
+  watch: UseFormWatch<BookingFormData>
+  setValue: UseFormSetValue<BookingFormData>
 }
 
-export function ReceiverStep({ register, errors }: Props) {
+export function ReceiverStep({ register, errors, watch, setValue }: Props) {
+  const receiverCountry = watch('receiverCountry')
+  const cityOptions = useMemo(() => getCityOptions(receiverCountry), [receiverCountry])
   return (
     <motion.div
       initial={{ opacity: 0, x: 30 }}
@@ -64,17 +70,23 @@ export function ReceiverStep({ register, errors }: Props) {
             {...register('receiverAddress', { required: 'Address is required' })}
           />
         </div>
-        <Input
+        <Select
+          id="receiverCity"
           label="City *"
-          placeholder="Los Angeles"
+          placeholder="Select city"
+          options={cityOptions}
           error={errors.receiverCity?.message}
-          {...register('receiverCity', { required: 'City is required' })}
+          searchable
+          value={watch('receiverCity')}
+          onValueChange={(value) => setValue('receiverCity', value)}
+          name="receiverCity"
         />
         <Select
           label="Country *"
           placeholder="Select country"
           options={countries}
           error={errors.receiverCountry?.message}
+          searchable
           {...register('receiverCountry', { required: 'Country is required' })}
         />
       </div>

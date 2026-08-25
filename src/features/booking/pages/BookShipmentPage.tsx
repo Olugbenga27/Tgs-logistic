@@ -22,6 +22,7 @@ export function BookShipmentPage() {
     handleSubmit,
     trigger,
     watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<BookingFormData>({
     defaultValues: defaultFormData,
@@ -80,8 +81,8 @@ export function BookShipmentPage() {
               <form onSubmit={handleSubmit(onSubmit)}>
                 <AnimatePresence mode="wait">
                   <div key={currentStep}>
-                    {currentStep === 0 && <SenderStep register={register} errors={errors} />}
-                    {currentStep === 1 && <ReceiverStep register={register} errors={errors} />}
+                    {currentStep === 0 && <SenderStep register={register} errors={errors} watch={watch} setValue={setValue} />}
+                    {currentStep === 1 && <ReceiverStep register={register} errors={errors} watch={watch} setValue={setValue} />}
                     {currentStep === 2 && <PackageStep register={register} errors={errors} />}
                     {currentStep === 3 && <ShippingMethodStep register={register} errors={errors} watch={watch} />}
                     {currentStep === 4 && <CourierStep register={register} errors={errors} watch={watch} />}
